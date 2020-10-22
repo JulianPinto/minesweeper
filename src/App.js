@@ -1,26 +1,37 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Game from './Components/game.js';
+import * as Constants from './constants.js';
+import './style.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            difficulty: Constants.EASY,
+        }
+        this.setToMedium = this.setToMedium.bind(this);
+        this.setToEasy = this.setToEasy.bind(this);
+    }
+
+    setToMedium() {
+        this.setState({ difficulty: Constants.MEDIUM })
+    }
+
+    setToEasy() {
+        this.setState({ difficulty: Constants.EASY })
+    }
+
+    render = () => (
+        <div className="App">
+            <h1 className="AppName">MINESWEEPER</h1>
+            <div class="gameSizes">
+                <button className="gameOption" onClick={this.setToEasy}>Easy</button>
+                <button className="gameOption" onClick={this.setToMedium}>Medium</button>
+            </div>
+            <Game key={this.state.difficulty[0]} difficulty={this.state.difficulty}>
+            </Game>
+        </div>
+    )
 }
 
 export default App;
