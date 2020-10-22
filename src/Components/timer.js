@@ -47,7 +47,8 @@ class Timer extends React.Component {
         return (
             <div className="timer">
                 {this.eventHandler()}
-                {this.state.time / 1000}
+                Timer:
+                {" " + this.state.time / 1000}
             </div>
         )
     }

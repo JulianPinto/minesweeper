@@ -48,7 +48,7 @@ class Game extends React.Component {
     }
 
     componentDidUpdate() {
-        if(this.state.arr.length !== this.props.difficulty[0]) {
+        if (this.state.arr.length !== this.props.difficulty[0]) {
             this.resetGame();
         }
     }
@@ -125,6 +125,8 @@ class Game extends React.Component {
         console.log("uncover", row, col);
         // if coordinates invalid, refuse this request
         if (!this.validCoord(row, col)) return false;
+        //if games over refuse
+        if (this.state.gameState === Constants.GAME_LOSS || this.state.gameState === Constants.GAME_WIN) return false;
         // if this is the very first move, populate the mines, but make
         // sure the current cell does not get a mine
         if (this.state.nuncovered === 0) {
@@ -158,6 +160,8 @@ class Game extends React.Component {
         console.log("mark", row, col);
         // if coordinates invalid, refuse this request
         if (!this.validCoord(row, col)) return false;
+        // game is over refuse request
+        if (this.state.gameState === Constants.GAME_LOSS || this.state.gameState === Constants.GAME_WIN) return false;
         // if cell already uncovered, refuse this
         console.log("marking previous state=", this.state.arr[row][col].state);
         if (this.state.arr[row][col].state === Constants.STATE_SHOWN) return false;
@@ -218,7 +222,7 @@ class Game extends React.Component {
     spaceClicked(rindex, cindex) {
         this.longPress = false;
         this.clickTimer = setTimeout(() => {
-            if(this.mark(rindex, cindex))
+            if (this.mark(rindex, cindex))
                 this.forceUpdate();
             this.longPress = true;
         }, 1000);
@@ -228,22 +232,27 @@ class Game extends React.Component {
     spaceReleased(rindex, cindex) {
         clearTimeout(this.clickTimer);
         if (!this.longPress) {
-            if(this.uncover(rindex, cindex))
+            if (this.uncover(rindex, cindex))
                 this.forceUpdate();
             const gameStatus = this.getStatus();
-            if(gameStatus.exploded)
+            if (gameStatus.exploded)
                 this.state.gameState = Constants.GAME_LOSS;
-            else if(gameStatus.done && !gameStatus.exploded)
+            else if (gameStatus.done && !gameStatus.exploded)
                 this.state.gameState = Constants.GAME_WIN;
         }
     }
 
+    rightClick(rindex, cindex) {
+        if (this.mark(rindex, cindex))
+                this.forceUpdate();
+    }
+
     displayMessage() {
-        if(this.state.gameState === Constants.GAME_LOSS)
+        if (this.state.gameState === Constants.GAME_LOSS)
             return "GAME OVER";
-        else if(this.state.gameState === Constants.GAME_WIN)
+        else if (this.state.gameState === Constants.GAME_WIN)
             return "Congratulations you win!";
-        else if(this.state.gameState === Constants.PLAYING)
+        else if (this.state.gameState === Constants.PLAYING)
             return "...tick tock...";
         else return;
     }
@@ -256,11 +265,12 @@ class Game extends React.Component {
                         row.split('').map((item, cindex) => (
                             <div key={cindex}
                                 className="space"
-                                onTouchStart={() => {this.spaceClicked(rindex, cindex)}}
-                                onTouchEnd={() => {this.spaceReleased(rindex, cindex)}}
-                                onMouseDown={() => {this.spaceClicked(rindex, cindex)}}
-                                onMouseUp={() => {this.spaceReleased(rindex, cindex)}}>
-                                    {this.getImage(item)}
+                                onTouchStart={() => { this.spaceClicked(rindex, cindex) }}
+                                onTouchEnd={() => { this.spaceReleased(rindex, cindex) }}
+                                onMouseDown={() => { this.spaceClicked(rindex, cindex) }}
+                                onMouseUp={() => { this.spaceReleased(rindex, cindex) }}
+                                onContextMenu={(e) => {e.preventDefault(); this.rightClick(rindex, cindex)}}>
+                                {this.getImage(item)}
                             </div>
                         ))}</div>
                 ))}
@@ -293,7 +303,7 @@ class Game extends React.Component {
                 <div className="game">
                     {this.renderBoard()}
                 </div>
-        <h2 className="gameResult">{this.displayMessage()}</h2>
+                <h2 className="gameResult">{this.displayMessage()}</h2>
             </div>
         )
     }
